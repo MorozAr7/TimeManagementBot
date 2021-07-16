@@ -1,9 +1,12 @@
 import telebot
 import datetime
+from flask import Flask, request
+import os
+
 
 token = "1861615620:AAGQvhdnWD_o9m836l1vvBat4ohnyCHpMGM"
 bot = telebot.TeleBot(token)
-
+server = Flask(__name__)
 
 Actual_date = 0
 Actual_month = 0
@@ -381,5 +384,20 @@ def choose_day(message):
     bot.send_message(message.chat.id, "CHOOSE THE DAY", reply_markup=keyboard)
 
 
+@server.route('/' + token, methods = ['POST'])
+def getMessage():
+    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("url-8"))])
+    return "!", 200
+
+
+@server.route("/")
+def webhook():
+    bot.remove_webhook()
+    bot.set_webhook(url='https://mysterious-cliffs-42856.herokuapp.com/ ' + token)
+    return "!", 200
+
+
 if __name__ == '__main__':
-    bot.web
+    server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+
+#https://mysterious-cliffs-42856.herokuapp.com/
