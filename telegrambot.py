@@ -94,9 +94,9 @@ def process_calls(call):
         elif STATE == "CHANGE":
             change_keyboard(int(call.data), call.message)
     elif call.data in day_callback_and_activity_callback:
+        CALLBACK_ACTIVITY_TO_CHANGE = call.data
         change_functions_keyboard(call.message, call.data)
         print(call.data, "CALL DATA")
-        CALLBACK_ACTIVITY_TO_CHANGE = call.data
     elif call.data == "R":
         CHANGE_STATUS = "RENAME"
         bot.send_message(call.message.chat.id, "<b><i>Write new activity: </i></b>", parse_mode='HTML')
@@ -221,6 +221,7 @@ def change_keyboard(callback, message):
 def change_functions_keyboard(message, data):
     keyboard = telebot.types.InlineKeyboardMarkup()
     argument, counter = process_callback_activity()
+    print(argument, counter, "ARG and COUNTER")
     MAIN = SCHEDULE[list_days[int(argument)]][CALLBACK_ACTIVITY_TO_CHANGE[counter + 1:]][1]
     if not MAIN:
         keyboard.add(telebot.types.InlineKeyboardButton("RENAME",
@@ -258,7 +259,8 @@ def process_callback_activity():
                 break
             argument += symbol
             counter += 1
-
+    print(argument)
+    print(CALLBACK_ACTIVITY_TO_CHANGE)
     return argument, counter
 
 
