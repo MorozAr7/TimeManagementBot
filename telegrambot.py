@@ -71,7 +71,6 @@ def process_calls(call):
         choose_day(call.message)
     elif call.data == "add":
         STATE = "ADD"
-        print(DAY_IS_EXPECTED, TIME_START_IS_EXPECTED, TIME_END_IS_EXPECTED, ACTIVITY_IS_EXPECTED, MAIN_IS_EXPECTED)
         choose_day(call.message)
     elif call.data == "change":
         STATE = "CHANGE"
@@ -96,7 +95,6 @@ def process_calls(call):
     elif call.data in day_callback_and_activity_callback:
         CALLBACK_ACTIVITY_TO_CHANGE = call.data
         change_functions_keyboard(call.message, call.data)
-        print(call.data, "CALL DATA")
     elif call.data == "R":
         CHANGE_STATUS = "RENAME"
         bot.send_message(call.message.chat.id, "<b><i>Write new activity: </i></b>", parse_mode='HTML')
@@ -104,7 +102,6 @@ def process_calls(call):
         CHANGE_STATUS = "DELETE"
         delete_activity(call.message)
         bot.send_message(call.message.chat.id, "<b><i>Activity was successfully deleted</i></b>", parse_mode='HTML')
-        print(SCHEDULE, "SCHEDULE after delete")
         start_command(call.message)
     elif call.data == "S":
         CHANGE_STATUS = "START"
@@ -352,15 +349,52 @@ def add_to_schedule(MAIN):
             SCHEDULE[Chosen_day][str(Chosen_start_time) + " - " + str(Chosen_end_time)] = [Activity, False]
 
 
+def time_str_to_int(time_str):
+    hours_str = ""
+    mins_str = ""
+    is_hours = True
+    for symbol in time_str:
+        if symbol == ":":
+            is_hours = False
+            continue
+        if is_hours:
+            hours_str += symbol
+        else:
+            mins_str += symbol
+    return 60 * int(hours_str) + int(mins_str)
+
+
+def parse_time_str(time_string):
+    parsed_time_str = ""
+    for symbol in time_string:
+        if symbol == "-":
+            return time_str_to_int(parsed_time_str)
+        parsed_time_str += symbol
+
+
+def sort_by_time(day_activity):
+    sorted_by_time_day_activity = dict()
+    sorted_by_time = list()
+    for key in day_activity.keys():
+        time = parse_time_str(key)
+        sorted_by_time.append((time, key))
+    sorted_by_time = sorted(sorted_by_time)
+    for time in sorted_by_time:
+        sorted_by_time_day_activity[time[1]] = day_activity[time[1]]
+
+    return sorted_by_time_day_activity
+
+
 def find_in_schedule(message):
     global STATE
     if Chosen_day in SCHEDULE.keys():
         day_activity = SCHEDULE[Chosen_day]
-        for key in day_activity:
-            if day_activity[key][1] is True:
-                bot.send_message(message.chat.id, "<b><i>" + str(key) + " | " + str(day_activity[key][0] +"</i></b>"+ "\n"), parse_mode = "HTML")
+        sorted_day_activity = sort_by_time(day_activity)
+        for key in sorted_day_activity:
+            if sorted_day_activity[key][1] is True:
+                bot.send_message(message.chat.id, "<b><i>" + str(key) + " | " + str(sorted_day_activity[key][0] +"</i></b>"+ "\n"), parse_mode = "HTML")
             else:
-                bot.send_message(message.chat.id, str(key) + " | " + str(day_activity[key][0] + "\n"))
+                bot.send_message(message.chat.id, str(key) + " | " + str(sorted_day_activity[key][0] + "\n"))
     else:
         bot.send_message(message.chat.id, text="<b><i>There are no activities for this day yet!</i></b>", parse_mode='HTML')
     STATE = None
