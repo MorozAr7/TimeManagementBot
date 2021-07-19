@@ -5,8 +5,9 @@ import os
 
 
 token = "1861615620:AAGQvhdnWD_o9m836l1vvBat4ohnyCHpMGM"
+
 bot = telebot.TeleBot(token)
-server = Flask(__name__)
+#server = Flask(__name__)
 
 Actual_date = 0
 Actual_month = 0
@@ -85,33 +86,33 @@ def process_calls(call):
         STATE = None
     elif call.data in days_callback:
         Chosen_day = list_days[int(call.data)]
-        if STATE is "ADD":
+        if STATE == "ADD":
             DAY_IS_EXPECTED = False
             bot.send_message(call.message.chat.id, str(Chosen_day[0]) + " " + Chosen_day[1] + "\n" + "Write the start time: ")
-        elif STATE is "SHOW":
+        elif STATE == "SHOW":
             find_in_schedule(call.message)
-        elif STATE is "CHANGE":
+        elif STATE == "CHANGE":
             change_keyboard(int(call.data), call.message)
     elif call.data in day_callback_and_activity_callback:
         change_functions_keyboard(call.message, call.data)
         print(call.data, "CALL DATA")
         CALLBACK_ACTIVITY_TO_CHANGE = call.data
-    elif call.data is "R":
+    elif call.data == "R":
         CHANGE_STATUS = "RENAME"
         bot.send_message(call.message.chat.id, "<b><i>Write new activity: </i></b>", parse_mode='HTML')
-    elif call.data is "D":
+    elif call.data == "D":
         CHANGE_STATUS = "DELETE"
         delete_activity(call.message)
         bot.send_message(call.message.chat.id, "<b><i>Activity was successfully deleted</i></b>", parse_mode='HTML')
         print(SCHEDULE, "SCHEDULE after delete")
         start_command(call.message)
-    elif call.data is "S":
+    elif call.data == "S":
         CHANGE_STATUS = "START"
-    elif call.data is "E":
+    elif call.data == "E":
         CHANGE_STATUS = "END"
-    elif call.data is "M":
+    elif call.data == "M":
         CHANGE_STATUS = "MAIN"
-    elif call.data is "N":
+    elif call.data == "N":
         CHANGE_STATUS = "NOTMAIN"
     elif call.data == "MAIN":
         print("SOSAT")
@@ -314,7 +315,7 @@ def check_time_string(time_str):
 
     new_time_str = ""
 
-    if not is_delimiter and len(time_str) is 4:
+    if not is_delimiter and len(time_str) == 4:
         new_time_str = time_str[:2] + ":" + time_str[-2:]
     else:
         if len(new_hours_str) < 2:
@@ -384,6 +385,7 @@ def choose_day(message):
     bot.send_message(message.chat.id, "CHOOSE THE DAY", reply_markup=keyboard)
 
 
+"""
 @server.route('/' + token, methods = ['POST'])
 def getMessage():
     bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("url-8"))])
@@ -395,9 +397,10 @@ def webhook():
     bot.remove_webhook()
     bot.set_webhook(url='https://mysterious-cliffs-42856.herokuapp.com/ ' + token)
     return "!", 200
-
+"""
 
 if __name__ == '__main__':
-    server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+   # server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+    bot.polling(none_stop=True)
 
 #https://mysterious-cliffs-42856.herokuapp.com/
